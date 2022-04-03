@@ -1,0 +1,99 @@
+---
+title: "Indiana Student Enrollments 2006 - 2022"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: 
+      version: 4
+      bootswatch: minty
+    orientation: columns
+    vertical_layout: fill
+    social: menu
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(DT)
+library(flexdashboard)
+library(shiny)
+library(leaflet)
+library(leafpop)
+library(leaflet.providers)
+```
+
+```{r global}
+map <- readRDS("./in_enrollment_change_map.rds")
+enrollments <- readRDS("./in_enrollments.rds")
+enrollment_change <- readRDS("./in_enrollment_change.rds")
+districts <- readRDS("./in_school_district_map.rds")
+table <- readRDS("./in_enrollment_table.rds")
+
+```
+
+## column
+
+### Indiana Student Enrollments by School Corporation
+
+```{r leaflet-map}
+# create factor variable ----
+pal <- colorFactor(
+    palette = "BrBG",
+    domain = districts$tot_chg_factor,
+    ordered = T
+)
+map <-
+    leaflet() |>
+    addProviderTiles("CartoDB.Positron") |>
+    setView(
+      lng = -86.15,
+      lat = 39.76,
+      zoom = 8
+    ) |> 
+    addPolygons(
+        data = districts,
+        color = ~ pal(tot_chg_factor),
+        weight = 2,
+        fillOpacity = .3,
+        popup = popupImage(
+            img = districts$images,
+            src = "local",
+            embed = TRUE,
+            height = 200,
+            width = 400
+        )
+    ) |>
+    addLegend(
+        position = "bottomright",
+        pal = pal,
+        title = "% Student Change:",
+        values = districts$tot_chg_factor
+     )
+map
+```
+
+## column
+
+### Indiana Public School Corporations by Size and Enrollment Change {data-height=800}
+
+```{r in-enrollment-table}
+DT::datatable(table,
+              fillContainer = TRUE,
+              colnames = c(
+                "Year" = "year",
+                "NCES ID" = "nces_id",
+                "Corp. ID" = "corp_id",
+                "School" = "corp_name",
+                "Students" = "tot_students",
+                "Pct. Chg. 2006 - 2022" = "tot_chg_enrollment"
+              ),
+              style = 'bootstrap4',
+              options = list(dom = 'tp',
+                             pageLength = 8),
+              #options =order = list(list(6, 'desc'))
+              rownames = FALSE)
+```
+
+### Notes {data-height=200}
+
+The Indiana Department of Education (IDOE) lists 413 school districts totaling 1,036,780 students for 2022. The US Census Bureau's cartographic boundaries file contained 290 separate school districts. When the two files were merged by the NCES identification variable, 288 schools remained. 980,291 students or 95.5% of students attended a school within the US Census Bureau cartographic boundary file.  Schools that were excluded contained a reference to a relgious affilation, contained the word "charter" in the name, or served a special population.
+

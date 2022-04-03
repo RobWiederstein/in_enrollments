@@ -1,0 +1,13 @@
+name: in_enrollments
+title: in_enrollments
+username:
+account: rob-wiederstein
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5998707
+bundleId: 5758253
+url: https://rob-wiederstein.shinyapps.io/in_enrollments/
+when: 1648937151.60612
+lastSyncTime: 1648937151.60613
+asMultiple: FALSE
+asStatic: FALSE
